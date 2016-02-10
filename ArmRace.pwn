@@ -14,11 +14,10 @@
 
 Игровой мод "Гонка Вооружений"
 Жанр: Team Deathmatch (TDM)
-Версия: v1.0 (Сборка 1)
-Дата выхода: xx.xx.2016 г.
+Версия: v1.0
+Дата выхода: 10.02.2016 г.
 Поддерживаемые версии: GTA SA:MP 0.3.7 и новее
-Адрес группы, посвященной данному моду: -
-GitHub: -
+GitHub: https://github.com/MaDoyScripts
 
 *================================*
 
@@ -62,7 +61,7 @@ GitHub: -
 Лог изменений:
 
 
-v1.0 (xx.xx.2016):
+v1.0 (10.02.2016):
 
 + Первый релиз игрового мода
 
@@ -113,11 +112,12 @@ printf("<¤>========================================<¤>");
 #define START_MONTH 12
 #define START_YEAR 2014
 
-// Дата выхода текущей сборки
-#define RELEASE_DAY 1
-#define RELEASE_MONTH 1
+// Дата выхода текущей версии
+#define RELEASE_DAY 10
+#define RELEASE_MONTH 2
 #define RELEASE_YEAR 2016
 #define ANNOUNCE_IF_OLD 1
+
 
 // Цвета
 #define COL_RED					0xFF0000AA
@@ -142,9 +142,10 @@ printf("<¤>========================================<¤>");
 #define GetAdminRankEx(%0) AdminRanksEx[%0] // Название уровня администированния в тв.падеже (по ID уровня, а не игрока!)
 #define GetAdminRankEx2(%0) AdminRanksEx2[%0] // Название уровня администированния в род.падеже (по ID уровня, а не игрока!)
 #define GetMonthNameRus(%0) MonthNamesRus[%0-1] // Название месяца
-#define GiveLevelWeapon(%0) GivePlayerWeapon(%0,LevelWeapons[GunLevel[%0]][0],9999) // Выдача игроку оружия его уровня
+#define GiveLevelWeapon(%0) GivePlayerWeapon(%0,LevelWeapons[GunLevel[%0]],9999) // Выдача игроку оружия его уровня
 #define GetPlayerLevelGunName(%0) WeapNames[PlayerLevel[GunLevel[%0]][0]] // Название уровнегого оружия игрока
- //#define ReloadWeapons(%0) ResetPlayerWeapons(%0), GivePlayerWeapon(%0,PlayerWeapon[GunLevel[%0]][0],9999) // Перезагрузка оружия игрока
+#define GetGunTD(%0) WeapTD[%0-22]
+#define ReloadWeapons(%0) ResetPlayerWeapons(%0), GivePlayerWeapon(%0,LevelWeapons[GunLevel[%0]],9999) // Перезагрузка оружия игрока
 #define SendErrorMessage(%0,%1) SendClientMessage(%0,0xFFFFFFFF,"{ff0000}Ошибка {ffffff}> "%1) // Отправка оформленного сообщения об ошибке
 
 
@@ -164,12 +165,6 @@ printf("<¤>========================================<¤>");
 #define mysql_pass "" // Пароль БД
 // ===============
 
-/*// MySQL Settings (Evehost)
-#define mysql_host "localhost" //Хост БД
-#define mysql_db "EVE_H11514" // Название БД
-#define mysql_user "H11514" //Пользователь БД
-#define mysql_pass "qweasdewq" // Пароль БД */
-// ===============*/
 
 new connectionHandle; // ID соединения MySQL
 new Text: FirstTextDraw; // Для исправления рассинхрона textdraw, textdraw-пустышка
@@ -317,7 +312,20 @@ enum hptdInfo // Система могиторинга HP
 
 new HPTD[MAX_PLAYERS][hptdInfo]; // массив текстдраврв системы мониторинга HP
 new HideHPTD[MAX_PLAYERS][2]; // Скрытие всплывающих уведомлений систеиы мониторинга HP
- 
+
+
+
+enum lutdInfo
+{
+	Text:BackgroundLUTD[4],
+	Text:TopicLUTD,
+	Text:TextLUTD[MAX_PLAYERS],
+	Text:ModelLUTD[13],
+	HideLUTD[MAX_PLAYERS],
+
+}
+
+new LevelUpTD[lutdInfo];
 //====
 
 
@@ -406,8 +414,9 @@ new BestScore, BestScoreT, BestScoreCT;
 new LeaderID, LeaderTID, LeaderCTID;
 // ===
 
-new LevelWeapons[14][2] = {{23, 9999}, {22, 9999}, {24, 9999}, {25, 9999}, {26, 9999}, {27, 9999}, {28, 9999}, {32, 9999}, {29, 9999}, {30, 9999}, {31, 9999}, {33,9999}, {34,9999}, {2,1}};
+new LevelWeapons[14] = {23, 22,24,25,26,27,28,32,29,30,31,33,34,2};
 new DefaultLevelWeapons[14] = {23, 22,24,25,26,27,28,32,29,30,31,33,34,2};
+//new TeamSkins[8] = {21,179,123,298,287,285,165,191}; // 1-4 - Т, 5-8 - КТ
 new RankNames[26][] = // Названия званий
 {
 	{"Нет"},
@@ -572,6 +581,64 @@ new MonthNamesRus[12][] =
 	{"декабря"}
 };
 
+new WeapTD[13] = {
+/*	{"?????"}, // 0
+	{"??????"}, // 1
+	{"Golf Club"}, // 2
+	{"Night Stick"}, // 3
+	{"???"}, // 4
+	{"Baseball Bat"}, // 5
+	{"Shovel"}, // 6
+	{"Pool Cue"}, // 7
+	{"Katana"}, // 8
+	{"Chainsaw"}, // 9
+	{"Purple Dildo"}, // 10
+	{"Big White Vibrator"}, // 11
+	{"Medium White Vibrator"}, // 12
+	{"Small White Vibrator"}, // 13
+	{"Flowers"}, // 14
+	{"Cane"}, // 15
+	{"Grenade"}, // 16
+	{"Teargas"}, // 17
+	{"Molotov"}, // 18
+	{" "}, // 19
+	{" "}, // 20
+	{" "}, // 21*/
+	1, // 22
+	0, // 23
+	2, // 24
+	3, // 25
+	4, // 26
+	5, // 27
+	6, // 28
+	8, // 29
+	9, // 30
+	10, // 31
+	7, // 32
+	11, // 33
+	12//, // 34
+/*	{"Rocket Launcher"}, // 35
+	{"Heat-Seeking Rocket Launcher"}, // 36
+	{"Flamethrower"}, // 37
+	{"Minigun"}, // 38
+	{"Satchel Charge"}, // 39
+	{"Detonator"}, // 40
+	{"Spray Can"}, // 41
+	{"Fire Extinguisher"}, // 42
+	{"Camera"}, // 43
+	{"Night Vision Goggles"}, // 44
+	{"Infrared Vision Goggles"}, // 45
+	{"Parachute"}, // 46
+	{"Fake Pistol"}, // 47
+	{" "}, // 48
+	{" Vehicle "}, // 49
+	{" Helicopter Blades "}, // 50
+	{" Explosion "}, // 51
+	{" "}, // 52
+	{" Drowned "}, // 53
+	{" Splat "} // 54*/
+};
+
 // Коордмнаты респавнов террористов
 new Float:gTeam1Spawns[7][4] = {{165.439468,1850.395019,25.498508,340.908874},{270.674896,1892.079223,25.500000,175.780807},{224.285385,1931.419921,17.640625,263.828247},{155.196548,1903.258789,18.700893,265.684997},{209.133255,1841.347045,17.640625,358.537017},{242.670776,1860.905761,17.928026,117.541275},{189.828308,1931.338134,17.640625,86.393249}};
 new Float:g2Team1Spawns[2][3] = {{-1463.4968,3973.1499,100.8846},{-1443.0544,3968.0269,92.9005}};
@@ -694,9 +761,9 @@ public OnGameModeInit()
 	ShowNameTags(0);
 	DisableInteriorEnterExits();
 	SendRconCommand("hostname Гонка Вооружений | GTA SAMP 0.3.7");
-	SendRconCommand("weburl armrace.besaba.com");
+	SendRconCommand("weburl https://github.com/MaDoyScripts");
 	SendRconCommand("language Русский (Russian)");
-	SetGameModeText("Гонка Вооружений | Версия 1.0.1");
+	SetGameModeText("Гонка Вооружений | Версия 1.0");
 	ostimer = SetTimer("OneSecondTimer",1000,true);
 	infotimer = SetTimer("InfoTimer",10*60*1000,true);
 	// Скины террористов
@@ -879,13 +946,253 @@ public OnGameModeInit()
 	TextDrawBoxColor(leaderBG[3], 204646);
 	TextDrawTextSize(leaderBG[3], 179.000000, 50.000000);
 	
-	URL = TextDrawCreate(21.000000, 426.000000, "vk.com/armrace_samp");
+	URL = TextDrawCreate(21.000000, 426.000000, "github.com/MaDoyScripts");
 	TextDrawBackgroundColor(URL, 255);
 	TextDrawFont(URL, 1);
 	TextDrawLetterSize(URL, 0.349999, 1.800000);
 	TextDrawColor(URL, -1);
 	TextDrawSetOutline(URL, 1);
 	TextDrawSetProportional(URL, 1);
+	
+	LevelUpTD[TopicLUTD] = TextDrawCreate(581.904663, 278.399902, "Level Up");
+	TextDrawLetterSize(LevelUpTD[TopicLUTD], 0.402379, 1.471999);
+	TextDrawAlignment(LevelUpTD[TopicLUTD], 2);
+	TextDrawColor(LevelUpTD[TopicLUTD], -1);
+	TextDrawSetShadow(LevelUpTD[TopicLUTD], 2);
+	TextDrawSetOutline(LevelUpTD[TopicLUTD], 0);
+	TextDrawBackgroundColor(LevelUpTD[TopicLUTD], 51);
+	TextDrawFont(LevelUpTD[TopicLUTD], 1);
+	TextDrawSetProportional(LevelUpTD[TopicLUTD], 1);
+	
+    LevelUpTD[BackgroundLUTD][0] = TextDrawCreate(620.094909, 277.766662, "usebox");
+	TextDrawLetterSize(LevelUpTD[BackgroundLUTD][0], 0.000000, 10.029367);
+	TextDrawTextSize(LevelUpTD[BackgroundLUTD][0], 546.095397, 0.000000);
+	TextDrawAlignment(LevelUpTD[BackgroundLUTD][0], 1);
+	TextDrawColor(LevelUpTD[BackgroundLUTD][0], 0);
+	TextDrawUseBox(LevelUpTD[BackgroundLUTD][0], true);
+	TextDrawBoxColor(LevelUpTD[BackgroundLUTD][0], 102);
+	TextDrawSetShadow(LevelUpTD[BackgroundLUTD][0], 0);
+	TextDrawSetOutline(LevelUpTD[BackgroundLUTD][0], 0);
+	TextDrawFont(LevelUpTD[BackgroundLUTD][0], 0);
+
+    LevelUpTD[BackgroundLUTD][1] = TextDrawCreate(620.094909, 277.766662, "usebox");
+	TextDrawLetterSize(LevelUpTD[BackgroundLUTD][1], 0.000000, 10.029367);
+	TextDrawTextSize(LevelUpTD[BackgroundLUTD][1], 546.095397, 0.000000);
+	TextDrawAlignment(LevelUpTD[BackgroundLUTD][1], 1);
+	TextDrawColor(LevelUpTD[BackgroundLUTD][1], 0);
+	TextDrawUseBox(LevelUpTD[BackgroundLUTD][1], true);
+	TextDrawBoxColor(LevelUpTD[BackgroundLUTD][1], 520093798);
+	TextDrawSetShadow(LevelUpTD[BackgroundLUTD][1], 0);
+	TextDrawSetOutline(LevelUpTD[BackgroundLUTD][1], 0);
+	TextDrawFont(LevelUpTD[BackgroundLUTD][1], 0);
+
+    LevelUpTD[BackgroundLUTD][2] = TextDrawCreate(620.094909, 277.766662, "usebox");
+	TextDrawLetterSize(LevelUpTD[BackgroundLUTD][2], 0.000000, 10.029367);
+	TextDrawTextSize(LevelUpTD[BackgroundLUTD][2], 546.095397, 0.000000);
+	TextDrawAlignment(LevelUpTD[BackgroundLUTD][2], 1);
+	TextDrawColor(LevelUpTD[BackgroundLUTD][2], 0);
+	TextDrawUseBox(LevelUpTD[BackgroundLUTD][2], true);
+	TextDrawBoxColor(LevelUpTD[BackgroundLUTD][2], 52363366);
+	TextDrawSetShadow(LevelUpTD[BackgroundLUTD][2], 0);
+	TextDrawSetOutline(LevelUpTD[BackgroundLUTD][2], 0);
+	TextDrawFont(LevelUpTD[BackgroundLUTD][2], 0);
+
+    LevelUpTD[BackgroundLUTD][3] = TextDrawCreate(620.094909, 277.766662, "usebox");
+	TextDrawLetterSize(LevelUpTD[BackgroundLUTD][3], 0.000000, 10.029367);
+	TextDrawTextSize(LevelUpTD[BackgroundLUTD][3], 546.095397, 0.000000);
+	TextDrawAlignment(LevelUpTD[BackgroundLUTD][3], 1);
+	TextDrawColor(LevelUpTD[BackgroundLUTD][3], 0);
+	TextDrawUseBox(LevelUpTD[BackgroundLUTD][3], true);
+	TextDrawBoxColor(LevelUpTD[BackgroundLUTD][3], 204646);
+	TextDrawSetShadow(LevelUpTD[BackgroundLUTD][3], 0);
+	TextDrawSetOutline(LevelUpTD[BackgroundLUTD][3], 0);
+	TextDrawFont(LevelUpTD[BackgroundLUTD][3], 0);
+
+// модели оружий
+
+	LevelUpTD[ModelLUTD][0] = TextDrawCreate(556.190490, 280.533416, " ");
+	TextDrawBackgroundColor(LevelUpTD[ModelLUTD][0], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][0], 0.460000, 3.400000);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][0], 94.761932, 94.400024);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][0], 1);
+	TextDrawColor(LevelUpTD[ModelLUTD][0], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][0], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][0], 255);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][0], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][0], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][0], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][0], 347);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][0], 0.000000, 0.000000, 0.000000, 1.000000);
+	
+	LevelUpTD[ModelLUTD][1] = TextDrawCreate(546.190673, 285.333129, " ");
+	TextDrawBackgroundColor(LevelUpTD[ModelLUTD][1], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][1], 0.000000, -0.303999);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][1], 109.999961, 78.933349);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][1], 2);
+	TextDrawColor(LevelUpTD[ModelLUTD][1], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][1], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][1], 255);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][1], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][1], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][1], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][1], 346);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][1], 0.000000, 0.000000, 0.000000, 1.000000);
+	
+	LevelUpTD[ModelLUTD][2] = TextDrawCreate(556.666931, 277.333343, " ");
+	TextDrawBackgroundColor(LevelUpTD[ModelLUTD][2], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][2], 0.000000, 0.000000);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][2], 109.999984, 97.066650);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][2], 1);
+	TextDrawColor(LevelUpTD[ModelLUTD][2], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][2], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][2], 0);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][2], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][2], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][2], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][2], 348);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][2], 0.000000, 351.000000, 0.000000, 1.000000);
+	
+    LevelUpTD[ModelLUTD][3] = TextDrawCreate(539.523925, 270.399902, " ");
+    TextDrawBackgroundColor(LevelUpTD[ModelLUTD][3], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][3], 0.000000, 0.000000);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][3], 114.285682, 103.466674);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][3], 1);
+	TextDrawColor(LevelUpTD[ModelLUTD][3], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][3], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][3], 0);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][3], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][3], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][3], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][3], 349);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][3], 0.000000, 0.000000, 0.000000, 3.000000);
+	
+	LevelUpTD[ModelLUTD][4] = TextDrawCreate(550.476257, 273.066650, " ");
+	TextDrawBackgroundColor(LevelUpTD[ModelLUTD][4], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][4], 0.000000, 0.000000);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][4], 108.095245, 101.333312);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][4], 1);
+	TextDrawColor(LevelUpTD[ModelLUTD][4], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][4], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][4], 0);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][4], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][4], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][4], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][4], 350);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][4], 1.000000, 0.000000, 0.000000, 2.000000);
+	
+	LevelUpTD[ModelLUTD][5] = TextDrawCreate(549.047607, 274.133300, " ");
+	TextDrawBackgroundColor(LevelUpTD[ModelLUTD][5], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][5], 0.000000, 0.000000);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][5], 136.190444, 110.399993);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][5], 1);
+	TextDrawColor(LevelUpTD[ModelLUTD][5], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][5], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][5], 0);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][5], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][5], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][5], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][5], 351);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][5], 0.000000, 0.000000, 0.000000, 2.000000);
+	
+	LevelUpTD[ModelLUTD][6] = TextDrawCreate(532.857360, 259.199920, " ");
+	TextDrawBackgroundColor(LevelUpTD[ModelLUTD][6], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][6], 0.000000, 0.000000);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][6], 112.857139, 113.066650);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][6], 1);
+	TextDrawColor(LevelUpTD[ModelLUTD][6], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][6], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][6], 0);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][6], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][6], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][6], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][6], 352);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][6], 0.000000, 0.000000, 0.000000, 2.000000);
+	
+	LevelUpTD[ModelLUTD][7] = TextDrawCreate(540.000183, 262.933258, " ");
+	TextDrawBackgroundColor(LevelUpTD[ModelLUTD][7], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][7], 0.000000, 0.000000);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][7], 119.047576, 108.799987);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][7], 1);
+	TextDrawColor(LevelUpTD[ModelLUTD][7], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][7], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][7], 255);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][7], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][7], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][7], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][7], 372);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][7], 0.000000, 0.000000, 0.000000, 2.000000);
+	
+	LevelUpTD[ModelLUTD][8] = TextDrawCreate(539.523864, 272.533233, " ");
+	TextDrawBackgroundColor(LevelUpTD[ModelLUTD][8], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][8], 0.000000, 0.000000);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][8], 115.714279, 111.466644);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][8], 1);
+	TextDrawColor(LevelUpTD[ModelLUTD][8], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][8], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][8], 0);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][8], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][8], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][8], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][8], 353);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][8], 0.000000, 0.000000, 0.000000, 2.000000);
+
+    LevelUpTD[ModelLUTD][9] = TextDrawCreate(527.142761, 263.999969, " ");
+    TextDrawBackgroundColor(LevelUpTD[ModelLUTD][9], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][9], 0.000000, 0.000000);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][9], 131.904724, 114.133331);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][9], 1);
+	TextDrawColor(LevelUpTD[ModelLUTD][9], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][9], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][9], 0);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][9], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][9], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][9], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][9], 355);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][9], 0.000000, 0.000000, 0.000000, 4.000000);
+	
+	LevelUpTD[ModelLUTD][10] = TextDrawCreate(533.333557, 267.733337, " ");
+	TextDrawBackgroundColor(LevelUpTD[ModelLUTD][10], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][10], 0.000000, 0.000000);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][10], 124.761924, 108.266662);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][10], 1);
+	TextDrawColor(LevelUpTD[ModelLUTD][10], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][10], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][10], 0);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][10], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][10], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][10], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][10], 356);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][10], 0.000000, 0.000000, 0.000000, 3.000000);
+	
+	LevelUpTD[ModelLUTD][11] = TextDrawCreate(534.285766, 269.333251, " ");
+	TextDrawBackgroundColor(LevelUpTD[ModelLUTD][11], 0);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][11], 0.000000, 0.000000);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][11], 128.095260, 108.799987);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][11], 1);
+	TextDrawColor(LevelUpTD[ModelLUTD][11], -1);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][11], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][11], 0);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][11], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][11], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][11], 5);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][11], 357);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][11], 0.000000, 0.000000, 0.000000, 3.000000);
+	
+	LevelUpTD[ModelLUTD][12] = TextDrawCreate(534.285766, 267.733184, " ");
+	TextDrawBackgroundColor(LevelUpTD[ModelLUTD][12], 0);
+	TextDrawFont(LevelUpTD[ModelLUTD][12], 5);
+	TextDrawLetterSize(LevelUpTD[ModelLUTD][12], 1.000000, 1.000000);
+	TextDrawColor(LevelUpTD[ModelLUTD][12], -1);
+	TextDrawTextSize(LevelUpTD[ModelLUTD][12], 121.904769, 115.199981);
+	TextDrawAlignment(LevelUpTD[ModelLUTD][12], 2);
+	TextDrawUseBox(LevelUpTD[ModelLUTD][12], true);
+	TextDrawBoxColor(LevelUpTD[ModelLUTD][12], 0);
+	TextDrawSetShadow(LevelUpTD[ModelLUTD][12], 0);
+	TextDrawSetOutline(LevelUpTD[ModelLUTD][12], 0);
+	TextDrawSetPreviewModel(LevelUpTD[ModelLUTD][12], 358);
+	TextDrawSetPreviewRot(LevelUpTD[ModelLUTD][12], 0.000000, 0.000000, 0.000000, 3.000000);
+
+
 	
 /*	LevelUpTD[14] = TextDrawCreate(620.000000, 271.000000, "   ");
 	TextDrawBackgroundColor(LevelUpTD[14], 255);
@@ -1086,32 +1393,32 @@ public OnGameModeInit()
 	TextDrawSetProportional(TeamScore, 1);
 	TextDrawSetShadow(TeamScore, 1);
 	//
-	TimeDisp = TextDrawCreate(608.000000, 24.000000,"00:00");
-	TextDrawUseBox(TimeDisp, 0);
-	TextDrawFont(TimeDisp, 3);
-	TextDrawSetShadow(TimeDisp,2);
-	TextDrawSetOutline(TimeDisp,1);
-	TextDrawBackgroundColor(TimeDisp,0x000000FF);
-	TextDrawColor(TimeDisp,0xFFFFFFFF);
-	TextDrawAlignment(TimeDisp,3);
-	TextDrawLetterSize(TimeDisp,0.649999, 1.500000);
+	TimeDisp = TextDrawCreate(576.666931, 24.000015, "00:00");
+	TextDrawLetterSize(TimeDisp, 0.476666, 1.802666);
+	TextDrawAlignment(TimeDisp, 2);
+	TextDrawColor(TimeDisp, -1);
+	TextDrawSetShadow(TimeDisp, 0);
+	TextDrawSetOutline(TimeDisp, 1);
+	TextDrawBackgroundColor(TimeDisp, 51);
+	TextDrawFont(TimeDisp, 1);
+	TextDrawSetProportional(TimeDisp, 1);
 	//
 	UpdateTime();
 	SetTimer("UpdateTime",1000*60,true);
 	//
-	DateDisp = TextDrawCreate(576.000000, 35.000000, "01.01.1970");
-	TextDrawAlignment(DateDisp, 2);
-	TextDrawBackgroundColor(DateDisp, 255);
-	TextDrawFont(DateDisp, 3);
-	TextDrawLetterSize(DateDisp, 0.310000, 2.000000);
-	TextDrawColor(DateDisp, -1);
-	TextDrawSetOutline(DateDisp, 1);
-	TextDrawSetProportional(DateDisp, 1);
-	TextDrawSetShadow(DateDisp,2);
 	format(string,sizeof(string),"%02d.%02d.%d",day,month,year);
-	TextDrawSetString(DateDisp,string);
+	DateDisp = TextDrawCreate(577.143432, 41.066722, string);
+	TextDrawLetterSize(DateDisp, 0.300952, 1.743999);
+	TextDrawTextSize(DateDisp, -1.904762, -0.533333);
+	TextDrawAlignment(DateDisp, 2);
+	TextDrawColor(DateDisp, -1);
+	TextDrawSetShadow(DateDisp, 0);
+	TextDrawSetOutline(DateDisp, 1);
+	TextDrawBackgroundColor(DateDisp, 51);
+	TextDrawFont(DateDisp, 1);
+	TextDrawSetProportional(DateDisp, 1);
 	//
-	printf("Version > MADMIL ArmRace Engine v1.0.1 (10.01.2016)");
+	printf("Version > MADMIL ArmRace Engine v1.0.1 (10.02.2016)");
 	printf("Info > На сервере установлено %d дополнительных объектов", CountDynamicObjects());
 	printf("Info > Игровой мод запущен %d %s %d года в %d:%02d:%02d по МСК", day,GetMonthNameRus(month),year,hour,minute,second);
 	string = "Info > ";
@@ -1318,6 +1625,7 @@ public OnPlayerDisconnect(playerid,reason)
 	TextDrawDestroy(exp[playerid]);
 	TextDrawDestroy(HealthTD_G[playerid]);
 	TextDrawDestroy(HealthTD_R[playerid]);
+	TextDrawDestroy(LevelUpTD[TextLUTD][playerid]);
 	Delete3DTextLabel(PlayerInformer[playerid]);
 	Delete3DTextLabel(PlayerStatus[playerid]);
 	if(GetPVarInt(playerid,"Logged") == 0) return 1;
@@ -1356,7 +1664,7 @@ public OnPlayerDisconnect(playerid,reason)
 		case 2: format(string,sizeof(string),"{B7FF00}%s {00FFEE}покинул сервер (Кик/Бан)",GetName(playerid));
 	}
 	SendClientMessageToAll(-1,string);
-	log("Logged",string);
+	//log("Logged",string);
 	if(LeaderID == playerid)
 	{
 		LeaderID = 999;
@@ -1652,7 +1960,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 		PlayerInfo[killerid][pRating]-=3;
 		PlayerInfo[killerid][pRankProgress]-=100;
 		ReloadWeapons(killerid);
-		format(string, sizeof(string),"> {FFFF99}%s {FFFFFF}убил товарища по команде и был понижен до {FFFF99}%d {FFFFFF}уровня ({FFFF99}%s{FFFFFF})",GetName(killerid), GunLevel[killerid]+1,GetGunName(LevelWeapons[GunLevel[killerid]][0]));
+		format(string, sizeof(string),"> {FFFF99}%s {FFFFFF}убил товарища по команде и был понижен до {FFFF99}%d {FFFFFF}уровня ({FFFF99}%s{FFFFFF})",GetName(killerid), GunLevel[killerid]+1,GetGunName(LevelWeapons[GunLevel[killerid]]));
 		SendClientMessageToAll(COLOR_WHITE, string);
 	 	GameTextForPlayer(killerid, "~r~TEAMKILL", 1500, 5);
 	 	GameTextForPlayer(playerid, "~r~KILLED BY TEAMMATE", 1500, 5);
@@ -1768,7 +2076,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				TextDrawSetString(HPTD[killerid][MonitoringHPTD],string);
 			}
 		}
-		format(string, sizeof(string),"> {FFFF99}%s {FFFFFF}убил голыми руками {FFFF99}%s {FFFFFF}и повысился до {FFFF99}%d уровня {FFFFFF}({FFFF99}%s{FFFFFF})", GetName(killerid), GetName(playerid), GunLevel[killerid]+1, GetGunName(LevelWeapons[GunLevel[killerid]][0]));
+		format(string, sizeof(string),"> {FFFF99}%s {FFFFFF}убил голыми руками {FFFF99}%s {FFFFFF}и повысился до {FFFF99}%d уровня {FFFFFF}({FFFF99}%s{FFFFFF})", GetName(killerid), GetName(playerid), GunLevel[killerid]+1, GetGunName(LevelWeapons[GunLevel[killerid]]));
 		SendClientMessageToAll(COLOR_WHITE,string);
 		SendClientMessage(killerid,COL_YELLOW,"Вы убили противника голыми руками! Вы получаете: +1 lvl, +30 hp, +1 аптечка!");
 		UpdateLevelTD(killerid);
@@ -1825,8 +2133,23 @@ stock LevelUp(playerid)
 		return true;
 	}
 	ReloadWeapons(playerid);
-	format(string,sizeof(string),"~g~Level Up!~n~%d level - %s",GunLevel[playerid]+1,GetGunName(LevelWeapons[GunLevel[playerid]][0]));
-	GameTextForPlayer(playerid, string, 2000, 5);
+	if(PlayerSettings[playerid][psSInterface] == false)
+	{
+	    if(LevelUpTD[HideLUTD][playerid] > 0) TextDrawHideForPlayer(playerid,LevelUpTD[ModelLUTD][GetGunTD(LevelWeapons[GunLevel[playerid]-1])]);
+	    LevelUpTD[HideLUTD][playerid] = 3;
+   		format(string,sizeof(string),"%s~n~%d level",GetGunName(LevelWeapons[GunLevel[playerid]]),GunLevel[playerid]+1);
+   		TextDrawSetString(LevelUpTD[TextLUTD][playerid],string);
+ 		TextDrawShowForPlayer(playerid,LevelUpTD[ModelLUTD][GetGunTD(LevelWeapons[GunLevel[playerid]])]);
+	    TextDrawShowForPlayer(playerid,LevelUpTD[TextLUTD][playerid]);
+	    TextDrawShowForPlayer(playerid,LevelUpTD[TopicLUTD]);
+	    TextDrawShowForPlayer(playerid,LevelUpTD[BackgroundLUTD][PlayerSettings[playerid][psInterfaceColor]]);
+	    
+	}
+	else
+	{
+		format(string,sizeof(string),"~g~Level Up!~n~%d level - %s",GunLevel[playerid]+1,GetGunName(LevelWeapons[GunLevel[playerid]]));
+		GameTextForPlayer(playerid, string, 3000, 5);
+	}
 	if(PlayerTeam[playerid] == 1 && BestScoreT < GunLevel[playerid])
 	{
 		if(LeaderTID != playerid)
@@ -1872,7 +2195,7 @@ stock LevelUp(playerid)
 		TextDrawHideForAll(leaderTD);
 		TextDrawShowForPlayer(LeaderID,leaderTD);
 		TextDrawHideForPlayer(LeaderID,leader);
-		format(string,sizeof(string),"> {FFFF99}%s {FFFFFF}лидирует с {FFFF99}%d {FFFFFF}уровнем ({FFFF99}%s{FFFFFF})", GetName(playerid), GunLevel[playerid]+1, GetGunName(LevelWeapons[GunLevel[playerid]][0]));
+		format(string,sizeof(string),"> {FFFF99}%s {FFFFFF}лидирует с {FFFF99}%d {FFFFFF}уровнем ({FFFF99}%s{FFFFFF})", GetName(playerid), GunLevel[playerid]+1, GetGunName(LevelWeapons[GunLevel[playerid]]));
 		SendClientMessageToAll(COLOR_WHITE,string);
 		format(string,sizeof(string),"Game Leader: %s (%d Level)", GetName(playerid), GunLevel[playerid]+1);
 		TextDrawSetString(leader,string);
@@ -1880,7 +2203,7 @@ stock LevelUp(playerid)
 	}
 	else
 	{
-		format(string,sizeof(string),"> {FFFF99}%s {FFFFFF}перешел на {FFFF99}%d {FFFFFF}уровень ({FFFF99}%s{FFFFFF})", GetName(playerid), GunLevel[playerid]+1, GetGunName(LevelWeapons[GunLevel[playerid]][0]));
+		format(string,sizeof(string),"> {FFFF99}%s {FFFFFF}перешел на {FFFF99}%d {FFFFFF}уровень ({FFFF99}%s{FFFFFF})", GetName(playerid), GunLevel[playerid]+1, GetGunName(LevelWeapons[GunLevel[playerid]]));
 		SendClientMessageToAll(COLOR_WHITE,string);
 		UpdateLevelTD(playerid);
 	}
@@ -2010,17 +2333,17 @@ public OnPlayerWinGame(winnerid)
 	mysql_query(query, -1, 0, connectionHandle);
 	return 1;
 }
+
+// Отладочные команды
 /*CMD:wingame(playerid,params[])
 {
 	OnPlayerWinGame(playerid);
 	return 1;
-}*/
+}
 
-/*CMD:lol(playerid,params[])
+CMD:levelup(playerid,params[])
 {
-	TextDrawShowForPlayer(playerid,LevelUpTD[1]);
-	TextDrawShowForPlayer(playerid,LevelUpTD[15]);
-	TextDrawShowForPlayer(playerid,LevelUpTD[14]);
+	LevelUp(playerid);
 	return 1;
 }*/
 
@@ -2062,14 +2385,14 @@ public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 	if(PlayerTeam[clickedplayerid] == 1)
 	{
 		format(text, sizeof(text), "Команда: Террористы\nЗвание: %s\nРейтинг ARR: %d\n\nУровень: %d\nОружие: %s\nОчки: %d/2\n\nУбийств: %d\nСмертей: %d\nКоэффициент У/С: %.2f\n\nВыстрелов: %d\nПопаданий: %d\nМеткость: %d%%\n\nНанесено урона: %d\nПолучено урона: %d\n\nЛучшая серия убийств: %d\nАптечек использовано: %d", RankNames[PlayerInfo[clickedplayerid][pRank]],PlayerInfo[clickedplayerid][pRating],
-		GunLevel[clickedplayerid]+1, GetGunName(LevelWeapons[GunLevel[clickedplayerid]][0]),KillScore[clickedplayerid], KillsInGame[clickedplayerid],DeathsInGame[clickedplayerid],float(KillsInGame[clickedplayerid]) / float(DeathsInGame[clickedplayerid]),
+		GunLevel[clickedplayerid]+1, GetGunName(LevelWeapons[GunLevel[clickedplayerid]]),KillScore[clickedplayerid], KillsInGame[clickedplayerid],DeathsInGame[clickedplayerid],float(KillsInGame[clickedplayerid]) / float(DeathsInGame[clickedplayerid]),
 		PlayerShots[clickedplayerid],PlayerGoodShots[clickedplayerid],GetPlayerShotQuallity(clickedplayerid),DamageGiven[clickedplayerid],DamageTaken[clickedplayerid],BestKillSeries[clickedplayerid], HealTimes[clickedplayerid]);
         ShowPlayerDialog(playerid,7, DIALOG_STYLE_MSGBOX, string, text, "Наблюдать","Закрыть");
 	}
 	else if(PlayerTeam[clickedplayerid] == 2)
 	{
 		format(text, sizeof(text), "Команда: Спецназ\nЗвание: %s\nРейтинг ARR: %d\n\nУровень: %d\nОружие: %s\nОчки: %d/2\n\nУбийств: %d\nСмертей: %d\nКоэффициент У/С: %.2f\n\nВыстрелов: %d\nПопаданий: %d\nМеткость: %d%%\n\nНанесено урона: %d\nПолучено урона: %d\n\nЛучшая серия убийств: %d\nАптечек использовано: %d", RankNames[PlayerInfo[clickedplayerid][pRank]],PlayerInfo[clickedplayerid][pRating],
-		GunLevel[clickedplayerid]+1, GetGunName(LevelWeapons[GunLevel[clickedplayerid]][0]),KillScore[clickedplayerid], KillsInGame[clickedplayerid],DeathsInGame[clickedplayerid],float(KillsInGame[clickedplayerid]) / float(DeathsInGame[clickedplayerid]),
+		GunLevel[clickedplayerid]+1, GetGunName(LevelWeapons[GunLevel[clickedplayerid]]),KillScore[clickedplayerid], KillsInGame[clickedplayerid],DeathsInGame[clickedplayerid],float(KillsInGame[clickedplayerid]) / float(DeathsInGame[clickedplayerid]),
 		PlayerShots[clickedplayerid],PlayerGoodShots[clickedplayerid],GetPlayerShotQuallity(clickedplayerid),DamageGiven[clickedplayerid],DamageTaken[clickedplayerid],BestKillSeries[clickedplayerid], HealTimes[clickedplayerid]);
         ShowPlayerDialog(playerid,7, DIALOG_STYLE_MSGBOX, string, text, "Наблюдать","Закрыть");
 	}
@@ -2129,6 +2452,16 @@ public OnPlayerConnect(playerid)
 	TextDrawSetProportional(exp[playerid], 1);
 	TextDrawSetShadow(exp[playerid], 1);
 	
+	LevelUpTD[TextLUTD][playerid] = TextDrawCreate(583.809448, 343.999877, "Dual Pistols ~n~2 level");
+	TextDrawLetterSize(LevelUpTD[TextLUTD][playerid], 0.210475, 1.135999);
+	TextDrawAlignment(LevelUpTD[TextLUTD][playerid], 2);
+	TextDrawColor(LevelUpTD[TextLUTD][playerid], -1);
+	TextDrawSetShadow(LevelUpTD[TextLUTD][playerid], 0);
+	TextDrawSetOutline(LevelUpTD[TextLUTD][playerid], 1);
+	TextDrawBackgroundColor(LevelUpTD[TextLUTD][playerid], 51);
+	TextDrawFont(LevelUpTD[TextLUTD][playerid], 1);
+	TextDrawSetProportional(LevelUpTD[TextLUTD][playerid], 1);
+
 /*	HealthTD_G[playerid] = TextDrawCreate(250.000000, 310.000000, "_");
 	TextDrawBackgroundColor(HealthTD_G[playerid], 255);
 	TextDrawFont(HealthTD_G[playerid], 1);
@@ -2216,16 +2549,16 @@ public OnPlayerConnect(playerid)
  	
 	return true;
 }
-stock ReloadWeapons(playerid)
+/*stock ReloadWeapons(playerid)
 {
 	ResetPlayerWeapons(playerid);
-	new weapon = LevelWeapons[GunLevel[playerid]][0];
-	new ammo = LevelWeapons[GunLevel[playerid]][1];
+	new weapon = LevelWeapons[GunLevel[playerid]];
+	//new ammo = LevelWeapons[GunLevel[playerid]][1];
 	//GivePlayerWeapon(playerid, 1, 1);
 	//GivePlayerWeapon(playerid, 4, 1);
-	GivePlayerWeapon(playerid, weapon, ammo);
+	GivePlayerWeapon(playerid, weapon, 9999);
 	return true;
-}
+}*/
 public OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ){if(PlayerInfo[playerid][pAdmin] > 2) return SetPlayerPosFindZ(playerid, fX, fY, fZ);return true;}
 public OnPlayerSpawn(playerid)
 {
@@ -2567,18 +2900,19 @@ CMD:ban(playerid,params[])
 	if(IsPlayerConnected(playerid))
 	{
 		new y,m,d;
+		new hours, minutes, seconds, timestamp;
 		if(!IsPlayerConnected(playeri)) return SendClientMessage(playerid,COLOR_WHITE,"Этого игрока нет на сервере.");
 		if(day <= 0) return SendClientMessage(playerid,COLOR_WHITE,"Дни бана должны быть больше нуля.");
 		if(PlayerInfo[playeri][pAdmin] > 0) return SendClientMessage(playerid, COLOR_WHITE, "Запрещено банить Администратора.");
 		getdate(y,m,d);
+		gettime(hours, minutes, seconds);
+		timestamp = date_to_timestamp(y,m,d,hours,minutes,seconds);
 		new string[200];
 	    format(string,sizeof(string),"Администратор %s забанил игрока %s сроком на %d дней. Причина: %s",GetName(playerid),GetName(playeri),day,result);
 	    SendClientMessageToAll(COLOR_LIGHTRED,string);
 		log("Ban", string);
-		format(string, sizeof(string), "Аккаунт забанен!\nВаш ник: %s\nЗабанил: %s\nДата бана: (%d.%d.%d)\nДней до разбана: %d\nПричина: %s\n\nЕсли Вы желаете оспорить данное действие, то\n\n ** сделайте Screenshot (Клавиша F8)\n ** и обратитесь в раздел к администрации сервера", GetName(playeri), GetName(playerid), d, m, y, day, result);
+		format(string, sizeof(string), "Аккаунт забанен!\nВаш ник: %s\nЗабанил: %s\nДата бана: (%d.%d.%d)\nДней до разбана: %d\nПричина: %s\n\nЕсли Вы желаете оспорить данное действие, то\n\n ** сделайте Screenshot (Клавиша F8)\n ** и обратитесь к администрации сервера", GetName(playeri), GetName(playerid), d, m, y, day, result);
 		ShowPlayerDialog(playeri,1337,DIALOG_STYLE_MSGBOX,"Аккаунт забанен",string,"Закрыть","");
-		new hours, minutes, seconds;
-		gettime(hours, minutes, seconds);
 		new dd = d;
 		new mm = m;
 		new yy = y;
@@ -2594,7 +2928,8 @@ CMD:ban(playerid,params[])
 			dd = dd-GetDayMount(mm,yy);
 		}
 		PlayerInfo[playeri][pBanned] = 1;
-		format(string,sizeof(string),"%d|%d|%d|%s|%s|%d|%d|%d|%d|%d|%d",dd,mm,yy,GetName(playerid), result,hours, minutes, seconds, d,m,y);
+//		format(string,sizeof(string),"%d|%d|%d|%s|%s|%d|%d|%d|%d|%d|%d",dd,mm,yy,GetName(playerid), result,hours, minutes, seconds, d,m,y);
+		format(string,sizeof(string),"%d|%s|%s|%d",timestamp,GetName(playerid), result,timestamp+day*86400);
 		new query[300];
 		format(query,sizeof(query),"UPDATE `accounts` SET `BanInfo`='%s' WHERE `Name`='%s'",string,GetName(playeri));
 		mysql_function_query(connectionHandle, query, false,"","");
@@ -2890,13 +3225,13 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	{
 	case 1:
 		{
-			if(!strlen(inputtext))return ShowPlayerDialog(playerid,1,DIALOG_STYLE_INPUT,"Регистрация","Добро пожаловать на Гонку Вооружений!\nДанный сервер не похож на остальные,\nтак как он является единственным в своем жанре!\n\nНа сервере:\n* 15 уровней с различными оружиями\n* 14 красивых карт\n* Персональная статистика и система лидеров\n\nЭтот аккаунт не зарегистрирован!\n\nВведите пароль:","Далее","Отмена");
+			if(!strlen(inputtext))return ShowPlayerDialog(playerid,1,DIALOG_STYLE_INPUT,"Регистрация - Гонка Вооружений","Добро пожаловать на Гонку Вооружений!\nДанный сервер не похож на остальные,\nтак как он является единственным в своем жанре!\n\nНа сервере:\n* 15 уровней с различными оружиями\n* 14 красивых карт\n* Персональная статистика и система лидеров\n\nЭтот аккаунт не зарегистрирован!\n\nВведите пароль:","Далее","Отмена");
 			OnPlayerRegister(playerid,inputtext);
 			return true;
 		}
 	case 2://Авторизация
 		{
-			if(!strlen(inputtext))return ShowPlayerDialog(playerid,2,DIALOG_STYLE_PASSWORD,"Авторизация","Добро пожаловать на Гонку Вооружений!\nДанный сервер не похож на остальные,\nтак как он является единственным в своем жанре!\n\nНа сервере:\n* 15 уровней с различными оружиями\n* 14 красивых карт\n* Персональная статистика и система лидеров\n\nЭтот аккаунт зарегистрирован!\nВведите пароль:","Вход","Отмена");
+			if(!strlen(inputtext))return ShowPlayerDialog(playerid,2,DIALOG_STYLE_PASSWORD,"Авторизация - Гонка Вооружений","Добро пожаловать на Гонку Вооружений!\nДанный сервер не похож на остальные,\nтак как он является единственным в своем жанре!\n\nНа сервере:\n* 15 уровней с различными оружиями\n* 14 красивых карт\n* Персональная статистика и система лидеров\n\nЭтот аккаунт зарегистрирован!\nВведите пароль:","Вход","Отмена");
 			OnPlayerLogin(playerid,inputtext);
 			return true;
 		}
@@ -2983,7 +3318,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			{
 				if(GetPVarInt(playerid,"Logged") == 1)
 				{
-					ShowPlayerDialog(playerid, 8, DIALOG_STYLE_MSGBOX,"О моде","Гонка Вооружений\n\n\nВерсия: 1.0 | Сборка 1\nДата выхода: xx.xx.2016\nГруппа VK: vk.com/armrace_samp\nСайт: armrace.besaba.com\n\n\nАвторы:\n\n+ Скриптер: MaDoy\n+ Тестеры: steadY., Mystery.,_Flomka_\n\nЕсли Вам понравился проект,\nВы можете пожертвовать любую сумму на этот WM-кошелек:\nR252789446533\n\n(c) 2014-2016, MADMIL Inc.","Закрыть","Назад");
+					ShowPlayerDialog(playerid, 8, DIALOG_STYLE_MSGBOX,"О моде","Гонка Вооружений\n\n\nВерсия: 1.0\nДата выхода: 10.02.2016\nГруппа VK: -\nСайт: -\n\n\nАвторы:\n\n+ Скриптер: MaDoy\n+ Тестеры: steadY., Mystery.,_Flomka_\n\nЕсли Вам понравился проект,\nВы можете пожертвовать любую сумму на этот WM-кошелек:\nR252789446533\n\n(c) 2014-2016, MADMIL Inc.","Закрыть","Назад");
 				}
 			}
 			case 6:
@@ -3286,6 +3621,11 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 						TextDrawHideForPlayer(playerid,HealAmountTD[playerid]);
 						TextDrawHideForPlayer(playerid,HealTD[0]);
 						TextDrawHideForPlayer(playerid,HealTD[PlayerSettings[playerid][psInterfaceColor]+1]);
+		    			TextDrawHideForPlayer(playerid,LevelUpTD[TextLUTD][playerid]);
+					    TextDrawHideForPlayer(playerid,LevelUpTD[TopicLUTD]);
+					    TextDrawHideForPlayer(playerid,LevelUpTD[BackgroundLUTD][PlayerSettings[playerid][psInterfaceColor]]);
+					    TextDrawHideForPlayer(playerid,LevelUpTD[ModelLUTD][GetGunTD(LevelWeapons[GunLevel[playerid]])]);
+					    LevelUpTD[HideLUTD][playerid] = 0;
 						HideHealTD[playerid] = 0;
 						TextDrawHideForPlayer(playerid,TKPlus1[0]);
 						TextDrawHideForPlayer(playerid,TKPlus1[1]);
@@ -3328,12 +3668,16 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			        TextDrawHideForPlayer(playerid,leaderBG[PlayerSettings[playerid][psInterfaceColor]]);
 			        if(SK[playerid] > 0) TextDrawHideForPlayer(playerid,RDTD[PlayerSettings[playerid][psInterfaceColor]+2]);
 			        if(HideHealTD[playerid] > 0) TextDrawHideForPlayer(playerid,HealTD[PlayerSettings[playerid][psInterfaceColor]+1]);
+			        if(LevelUpTD[HideLUTD][playerid] > 0) TextDrawHideForPlayer(playerid,LevelUpTD[BackgroundLUTD][PlayerSettings[playerid][psInterfaceColor]]);
+			        
 			        if(PlayerSettings[playerid][psInterfaceColor] < 3) PlayerSettings[playerid][psInterfaceColor]++;
 			        else PlayerSettings[playerid][psInterfaceColor] = 0;
+			        
 			        TextDrawShowForPlayer(playerid,lvlexpBG[PlayerSettings[playerid][psInterfaceColor]]);
 			        TextDrawShowForPlayer(playerid,leaderBG[PlayerSettings[playerid][psInterfaceColor]]);
 			        if(SK[playerid] > 0) TextDrawShowForPlayer(playerid,RDTD[PlayerSettings[playerid][psInterfaceColor]+2]);
 			        if(HideHealTD[playerid] > 0) TextDrawShowForPlayer(playerid,HealTD[PlayerSettings[playerid][psInterfaceColor]+1]);
+			        if(LevelUpTD[HideLUTD][playerid] > 0) TextDrawShowForPlayer(playerid,LevelUpTD[BackgroundLUTD][PlayerSettings[playerid][psInterfaceColor]]);
 			    }
 			    ShowSettingDialog(playerid);
 			}
@@ -3516,189 +3860,6 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	{
 		if(!response) return cmd_help(playerid,"");
 	}
-/*  case 12: // Разное
-	{
-		if(!response) return ShowSettingDialog(playerid);
-			if(listitem == 0) // Шляпа Санты
-			{
-				SetPlayerAttachedObject( playerid, 0, 19065, 2, 0.121128, 0.023578, 0.001139, 222.540847, 90.773872, 211.130859, 1.098305, 1.122310, 1.106640 ); // SantaHat
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 1) // Попугай на плече
-			{
-				SetPlayerAttachedObject( playerid, 0, 19078, 1, 0.329150, -0.072101, 0.156082, 0.000000, 0.000000, 0.000000, 1.000000, 1.000000, 1.000000 ); // TheParrot1
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 2) // Попугай
-			{
-				SetPlayerAttachedObject( playerid, 0, 19078, 1, -1.097527, -0.348305, -0.008029, 0.000000, 0.000000, 0.000000, 8.073966, 8.073966, 8.073966 ); // TheParrot1 - parrot man
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 3) // Бегемот
-			{
-				SetPlayerAttachedObject( playerid, 0, 1371, 1, 0.037538, 0.000000, -0.020199, 350.928314, 89.107200, 180.974227, 1.000000, 1.000000, 1.000000 ); // CJ_HIPPO_BIN - /hippo
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 4) // Кепка
-			{
-				SetPlayerAttachedObject( playerid, 0, 18939, 2, 0.147825, 0.010626, -0.004892, 0.000000, 0.000000, 0.000000, 1.000000, 1.000000, 1.000000 ); // CapBack1 - Sapca RuTeN
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 5) // Кейс в руке
-			{
-				SetPlayerAttachedObject( playerid, 0, 1210, 6, 0.259532, -0.043030, -0.009978, 85.185333, 271.380615, 253.650283, 1.000000, 1.000000, 1.000000 ); // briefcase - briefcase
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 6) // Мешок денег
-			{
-				SetPlayerAttachedObject( playerid, 0, 1550, 15, 0.016491, 0.205742, -0.208498, 0.000000, 0.000000, 0.000000, 1.000000, 1.000000, 1.000000 ); // CJ_MONEY_BAG - money
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 7) // Акула
-			{
-				SetPlayerAttachedObject(playerid, 0, 1608, 1, 0.201047, -1.839761, -0.010739, 0.000000, 90.005447, 0.000000, 1.000000, 1.000000, 1.000000 ); // shark - shark
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 8) // Дельфин
-			{
-				SetPlayerAttachedObject( playerid, 0, 1607, 1, 0.000000, 0.000000, 0.000000, 0.000000, 86.543479, 0.000000, 1.000000, 1.000000, 1.000000 ); // dolphin - /dolphin
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 9) // Шапка курицы
-			{
-				SetPlayerAttachedObject( playerid, 0, 19137, 2, 0.110959, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 1.000000, 1.000000 ); // CluckinBellHat1 - 7
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 10) // Щит на руке
-			{
-				SetPlayerAttachedObject(playerid, 1 , 18637, 1, 0, -0.1, 0.18, 90, 0, 272, 1, 1, 1);
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 11) // Щит на спине
-			{
-				SetPlayerAttachedObject(playerid, 1, 18637, 4, 0.3, 0, 0, 0, 170, 270, 1, 1, 1);
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			//------------------------------------------------------------------------------
-			if(listitem == 12) // Фонарик
-			{
-				SetPlayerAttachedObject(playerid, 2,18641, 5, 0.1, 0.02, -0.05, 0, 0, 0, 1, 1, 1);
-				PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-			}
-			if(listitem == 13) // Электрошок
-            {
-            SetPlayerAttachedObject(playerid, 2,18642, 5, 0.12, 0.02, -0.05, 0, 0, 45,1,1,1);
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            if(listitem == 14) // огневые руки
-            {
-            SetPlayerAttachedObject( playerid, 3, 18693, 6, 0.033288, 0.000000, -1.647527, 0.000000, 0.000000, 0.000000, 1.000000, 1.000000, 1.000000 ); ////правая рука
-            SetPlayerAttachedObject( playerid, 4, 18693, 5, 0.036614, 1.886157, 0.782101, 145.929061, 0.000000, 0.000000, 0.469734, 200.000000, 1.000000 ); //левая рука
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //------------------------------------------------------------------------------------
-            if(listitem == 15)
-            {
-            SetPlayerAttachedObject( playerid, 0, 18728, 2, 0.134301, 1.475258, -0.192459, 82.870338, 0.000000, 0.000000, 1.000000, 1.000000, 1.000000 );
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //----------------------------------------------------------------------------------------
-            if(listitem == 16)
-            {
-            SetPlayerAttachedObject( playerid, 0, 2114, 2, 0.043076, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000, 1.000000, 1.000000 );
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //------------------------------------------------------------------------------------------
-            if(listitem == 17)//Воляной шар
-            {
-            SetPlayerAttachedObject( playerid, 0, 18844, 1, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, -0.027590, -0.027590, -0.027590 );
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //----------------------------------------------------------------------------------------------
-            if(listitem == 18)// Доска для серфинга #1
-            {
-            SetPlayerAttachedObject ( playerid, 0, 2404, 1, 0.0089, -0.1350, -0.0129, 1.00, 125.49, 0.89, 0.86, 0.78, 0.71);
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //-------------------------------------------------------------------------------------------------
-            if(listitem == 19)//Гитара на спине
-            {
-            SetPlayerAttachedObject ( playerid, 0, 19317, 1, 0.2330, -0.0989, -0.0299, -2.49, 88.09, 2.09, 0.73, 1.89, 0.71);
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //---------------------------------------------------------------------------------------------------
-            if(listitem == 20)//Гамбургер
-            {
-            SetPlayerAttachedObject(playerid, 0, 2703, 2, -0.6070, 0.2190, -0.0129, 176.99, 0.00, 0.00, 7.11, 6.89, 6.92);
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //----------------------------------------------------------------------------------------------------
-            if(listitem == 21)//бутылка
-            {
-            SetPlayerAttachedObject(playerid, 0, 1486, 1, 0.1590, 0.0180, 0.0040, -90.49, 91.09, 12.80, 9.14, 10.51, 6.60);
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //-------------------------------------------------------------------------------------------------------
-            if(listitem == 22) //Пожарная шапка
-            {
-            SetPlayerAttachedObject(playerid, 0, 19330, 2, 0.1730, -0.0180, 0.0029, 0.00, 0.00, 0.00, 1.00, 1.00, 1.00);
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //---------------------------------------------------------------------------------------------------------
-            if(listitem == 23)//магнитола
-            {
-            SetPlayerAttachedObject(playerid, 0, 2226, 5, 0.3089, 0.0089, 0.0380, -20.29, -99.49, 0.00, 1.00, 1.00, 1.00);
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-			//--------------------------------------------------------------------------------------------------------------
-            if(listitem == 24)//рога
-            {
-            SetPlayerAttachedObject(playerid, 0, 19314, 2, 0.1360, 0.0680, 0.0019, -0.29, 0.00, -46.79, 1.00, 1.00, 1.00);
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //---------------------------------------------------------------------------------------------------------------------
-            if(listitem == 25)//факел в левой руке
-            {
-            SetPlayerAttachedObject(playerid, 0, 3461, 5, -0.4580, -0.2119, -0.4439, 153.10, -46.59, 80.80, 0.45, 0.89, 0.73);
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //-------------------------------------------------------------------------------------------------------------------------
-            if(listitem == 26)//голова CJ
-            {
-            SetPlayerAttachedObject(playerid, 0, 18963, 2, 0.0989, 0.0140, -0.0069, 85.49, 87.10, 6.89, 1.37, 1.38, 1.12);
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            //-----------------------------------------------------------------------------------------------------------------
-            if(listitem == 27)//Грабли в левой руке
-            {
-            SetPlayerAttachedObject(playerid, 0, 18890, 5, 0.0519, -0.0409, 0.1460, 0.00, 0.00, 0.00, 1.00, 1.00, 1.00);
-            PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-            }
-            if(listitem == 28) // Снятие предметов
-            {
-            new zz=0;
-            while(zz!=MAX_PLAYER_ATTACHED_OBJECTS)
-            {
-            if(IsPlayerAttachedObjectSlotUsed(playerid, zz))
-            {
-            RemovePlayerAttachedObject(playerid, zz);
-            }
-            zz++;
-            }
-            return 1;
-			}
-   }*/
    	case 13:
    	{
    	    if(!response) cmd::menu(playerid,"");
@@ -3806,7 +3967,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
    			case 5:
    	        {
 				ChangingVar[playerid] = 5;
-				format(string,sizeof(string),"Вы изменяете количество уровней.\n\nДоступные значения:\n3-14 - количество игровых уровней\n\nВНИМАНИЕ: Новое значение обязательно должно быть больше, чем уровень лидра игры!\n\nТекущее количество уровней: %d\nВведите свое значение:",ServerSettings[ssLevels]);
+				format(string,sizeof(string),"Вы изменяете количество уровней.\n\nДоступные значения:\n3-14 - количество игровых уровней\n\nВНИМАНИЕ: Новое значение обязательно должно быть больше, чем уровень лидера игры!\n\nТекущее количество уровней: %d\nВведите свое значение:",ServerSettings[ssLevels]+1);
 				ShowPlayerDialog(playerid,15,DIALOG_STYLE_INPUT,"Количество уровней - Панель конфигурации сервера",string,"Далее","Назад");
 			}
    			case 6:
@@ -3932,7 +4093,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			case 14:
 			{
 			    // Изменение оружия по уровням
-
+                ShowLevelWeaponsMenu(playerid);
 			}
 			case 15:
 			{
@@ -3975,9 +4136,9 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			case 5:
 			{
 			    new entervar = strval(inputtext);
-				if(entervar < 3 || entervar > 14 || entervar <= BestScore)
+				if(entervar < 3 || entervar > 14 || entervar >= BestScore)
 				{
-					format(string,sizeof(string),"Вы ввели недопутимое значение.\n\nДоступные значения:\n3-14 - количество игровых уровней\n\nВНИМАНИЕ: Новое значение обязательно должно быть больше, чем уровень лидра игры!\n\nТекущее количество уровней: %d\nВведите свое значение:",ServerSettings[ssLevels]);
+					format(string,sizeof(string),"Вы ввели недопутимое значение.\n\nДоступные значения:\n3-14 - количество игровых уровней\n\nВНИМАНИЕ: Новое значение обязательно должно быть больше, чем уровень лидера игры!\n\nТекущее количество уровней: %d\nВведите свое значение:",ServerSettings[ssLevels]+1);
 					ShowPlayerDialog(playerid,15,DIALOG_STYLE_INPUT,"Количество уровней - Панель конфигурации сервера",string,"Далее","Назад");
 					return true;
 				}
@@ -4083,10 +4244,11 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	}
 	case 17:
 	{
+	    if(!response) return ShowLevelWeaponsMenu(playerid);
 	    if(listitem > sizeof(DefaultLevelWeapons)) return true;
 	    new string[128];
-	    LevelWeapons[ChangingLevel[playerid]][0] = DefaultLevelWeapons[listitem];
-	    format(string,sizeof(string),"{0000ff}Уровни {ffffff}> Оружие %d уровня изменено на %s",ChangingLevel[playerid],GetGunName(DefaultLevelWeapons[listitem]),listitem+1);
+	    LevelWeapons[ChangingLevel[playerid]] = DefaultLevelWeapons[listitem];
+	    format(string,sizeof(string),"{0000ff}Уровни {ffffff}> Оружие %d уровня изменено на %s",ChangingLevel[playerid]+1,GetGunName(DefaultLevelWeapons[listitem]));
 	    SendClientMessageToAll(COLOR_WHITE,string);
 	    foreach(Player,i)
 	    {
@@ -4094,6 +4256,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	        {
 	            LevelUpDelay[i] = true;
 	            ReloadWeapons(i);
+	            UpdateLevelTD(i);
+	            if(PlayerSpawned[i] == true) UpdateInformer(i);
 	        }
 	    }
 	    ShowLevelWeaponsMenu(playerid);
@@ -4301,6 +4465,17 @@ public OneSecondTimer()
 			    TextDrawHideForPlayer(i,HealTD[PlayerSettings[i][psInterfaceColor]+1]);
 		    }
 		}
+		if(LevelUpTD[HideLUTD][i] > 0)
+		{
+		    LevelUpTD[HideLUTD][i]--;
+		    if(LevelUpTD[HideLUTD][i] <= 0)
+		    {
+			    TextDrawHideForPlayer(i,LevelUpTD[TextLUTD][i]);
+			    TextDrawHideForPlayer(i,LevelUpTD[TopicLUTD]);
+			    TextDrawHideForPlayer(i,LevelUpTD[BackgroundLUTD][PlayerSettings[i][psInterfaceColor]]);
+			    TextDrawHideForPlayer(i,LevelUpTD[ModelLUTD][GetGunTD(LevelWeapons[GunLevel[i]])]);
+		    }
+		}
 		if(HideHPTD[i][HideMinusHPTD] > 0)
 		{
 		    HideHPTD[i][HideMinusHPTD]--;
@@ -4332,7 +4507,7 @@ public OneSecondTimer()
 			format(sstring, sizeof(sstring), "Гонка Вооружений - Сервер 1\n\nДата - %d %s %d года\nВремя - %02d часов %02d минут %02d секунд\nТекущая карта - %s (ID: %d)\nИгроков онлайн: %d (T: %d | CT: %d | SPEC: %d)", day, GetMonthNameRus(month), year, hour, minuite, second, MapNames[Map], Map, GetOnline(), GetTeamOnline(1), GetTeamOnline(2), GetTeamOnline(3));
 			ShowPlayerDialog(i,13,DIALOG_STYLE_MSGBOX,"Дата и время",sstring,"Закрыть","Назад");
 		}
-		if(GetPlayerWeapon(i) != LevelWeapons[GunLevel[i]][0] && GetPlayerWeapon(i) != 0 && PlayerSpawned[i] == true && LevelUpDelay[i] == false && GunLevel[i] < ServerSettings[ssLevels] && ServerSettings[ssAntiCheat] == true)
+		if(GetPlayerWeapon(i) != LevelWeapons[GunLevel[i]] && GetPlayerWeapon(i) != 0 && PlayerSpawned[i] == true && LevelUpDelay[i] == false && GunLevel[i] < ServerSettings[ssLevels] && ServerSettings[ssAntiCheat] == true)
 		{
 		    format(string,sizeof(string),"%s был кикнут за использование чита на оружие (LvL: %d | Оружие: %s)",GetName(i),GunLevel[i]+1,GetGunName(GetPlayerWeapon(i)));
 			SendClientMessageToAll(COLOR_LIGHTRED,string);
@@ -4724,23 +4899,6 @@ public OnPlayerGiveDamage(playerid, damagedid, Float:amount, weaponid, bodypart)
 }
 public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
-/*	if(newkeys & KEY_FIRE)
-	{
-		if(GetPlayerWeapon(playerid) != PlayerWeapon[GunLevel[playerid]][0] && GetPlayerWeapon(playerid) != 4 && GetPlayerWeapon(playerid) != 1 && PlayerTeam[playerid] != 3 && PlayerTeam[playerid] != 0)
-		{
-		    new string[128];
-			format(string, sizeof(string), "[Античит] %s (ID: %d) , возможно, использует чит на оружие (LvL: %d | Оружие: %s)",GetName(playerid),playerid,GunLevel[playerid]+1,GetGunName(GetPlayerWeapon(playerid)));
-			SendAdminMessage(COL_RED,string);
-			GunCheatWarns[playerid]++;
-			if(GunCheatWarns[playerid] >= 3)
-			{
-			    SendClientMessage(playerid,COL_RED,"Вы были кикнуты за использованние чита на оружие!");
-			    Kick(playerid);
-			    format(string, sizeof(string), "[Античит] %s (ID: %d) был кикнут по подозрению в читерстве!",GetName(playerid),playerid);
-	   			SendClientMessageToAll(COL_RED,string);
-			}
-		}
-	} */
 	if(newkeys == KEY_FIRE && PlayerTeam[playerid] == 3 && PlayerSpectating[playerid] != 999) // Left Spec Looping
 	{
 	    for(new i= PlayerSpectating[playerid]-1;i>=0;i--)
@@ -4806,12 +4964,12 @@ public OnPlayerRegCheck(playerid)
 		new rows, fields;cache_get_data(rows, fields);
 		if(rows) 
 		{
-		ShowPlayerDialog(playerid,2,DIALOG_STYLE_PASSWORD,"Авторизация","Добро пожаловать на Гонку Вооружений!\nДанный сервер не похож на остальные,\nтак как он является единственным в своем жанре!\n\nНа сервере:\n* 14 уровней с различными оружиями\n* 20 красивых карт\n* Персональная статистика и система лидеров\n\nЭтот аккаунт зарегистрирован!\n\nВведите пароль:","Вход","Отмена");
+		ShowPlayerDialog(playerid,2,DIALOG_STYLE_PASSWORD,"Авторизация - Гонка Вооружений","Добро пожаловать на Гонку Вооружений!\nДанный сервер не похож на остальные,\nтак как он является единственным в своем жанре!\n\nНа сервере:\n* 14 уровней с различными оружиями\n* 20 красивых карт\n* Персональная статистика и система лидеров\n\nЭтот аккаунт зарегистрирован!\n\nВведите пароль:","Вход","Отмена");
 		SendClientMessage(playerid,COLOR_WHITE,"Добро пожаловать на сервер {ffff99}Гонка Вооружений!{ffffff} Этот аккаунт {00ff00}зарегистрирован {ffffff}на сервере!");
 		}
 		else
 		{ 
-		ShowPlayerDialog(playerid,1,DIALOG_STYLE_INPUT,"Регистрация","Добро пожаловать на Гонку Вооружений!\nДанный сервер не похож на остальные,\nтак как он является единственным в своем жанре!\n\nНа сервере:\n* 14 уровней с различными оружиями\n* 20 красивых карт\n* Персональная статистика и система лидеров\n\nЭтот аккаунт не зарегистрирован!\n\nВведите пароль:","Далее","Отмена");
+		ShowPlayerDialog(playerid,1,DIALOG_STYLE_INPUT,"Регистрация - Гонка Вооружений","Добро пожаловать на Гонку Вооружений!\nДанный сервер не похож на остальные,\nтак как он является единственным в своем жанре!\n\nНа сервере:\n* 14 уровней с различными оружиями\n* 20 красивых карт\n* Персональная статистика и система лидеров\n\nЭтот аккаунт не зарегистрирован!\n\nВведите пароль:","Далее","Отмена");
 		SendClientMessage(playerid,COLOR_WHITE,"Добро пожаловать на сервер {ffff99}Гонка Вооружений!{ffffff} Этот аккаунт {ff0000}не зарегистрирован {ffffff}на сервере!");
 		}
 		}
@@ -4833,7 +4991,25 @@ stock OnPlayerRegister(p, password[])
 }
 
 forward RegisterCallback(playerid);
-public RegisterCallback(playerid){SendClientMessage(playerid,COLOR_WHITE,"Регистрация прошла {00ff00}успешно! {ffffff}Добро пожаловать на {ffff99}Гонку Вооружений!");SetPVarInt(playerid,"Logged", 1), TogglePlayerSpectating(playerid, 0),ForceClassSelection(playerid);return true;}
+public RegisterCallback(playerid)
+{
+	SendClientMessage(playerid,COLOR_WHITE,"Регистрация прошла {00ff00}успешно! {ffffff}Добро пожаловать на {ffff99}Гонку Вооружений!");
+	new string[128];
+	format(string, sizeof(string),"SELECT * FROM `accounts` WHERE `Name` = '%s'", GetName(playerid));
+	mysql_function_query(connectionHandle, string, true, "FixAccountID","d", playerid);
+	SetPVarInt(playerid,"Logged", 1), TogglePlayerSpectating(playerid, 0),ForceClassSelection(playerid);
+	return true;
+}
+
+forward FixAccountID(playerid);
+public FixAccountID(playerid)
+{
+//	SendClientMessage(playerid,COLOR_WHITE,"Регистрация прошла {00ff00}успешно! {ffffff}Добро пожаловать на {ffff99}MADMIL MatchMaking!");
+	new rows, fields, maximum[16];
+	cache_get_data(rows, fields);
+	cache_get_field_content(0, "ID", maximum), PlayerInfo[playerid][pID] = strval(maximum);
+	return true;
+}
 
 stock SavePlayer(p)
 {
@@ -4898,32 +5074,20 @@ public LoginCallback(i, password[])
 	mysql_free_result();
 	if(PlayerInfo[i][pBanned] >= 1)
 	{
-		new d,m,y;
-		new baninfo[11][32];
-		//new newt[MAX_PLAYERS];
-		//new bday,bmonth,byear,bhour,bminute,bsecond;
-		//newt[i] = 0;
+		new d,m,y,h,mint,s,curtimestamp;
+		new baninfo[4][32];
 		getdate(y,m,d);
+		gettime(h,mint,s);
 		split(string, baninfo, '|');
-//		bday = strval(baninfo[0]);
-//		bmonth = strval(baninfo[1]);
-//		yyy[playerid] = strval(baninfo[2]);
-		//ini_getString(playerid, "nick", (baninfo[3]));
-		//ini_getString(playerid, "reason", (baninfo[4]));
-//	 	hourd[playerid] = strval(baninfo[5]);
-//		minuted[playerid] = strval(baninfo[6]);
-//		secondd[playerid] = strval(baninfo[7]);
-//		days[playerid] = strval(baninfo[8]);
-//		mes[playerid] = strval(baninfo[9]);
-//		God[playerid] = strval(baninfo[10]);
-		if(strval(baninfo[1]) > m && strval(baninfo[2]) == y || strval(baninfo[2]) > y || strval(baninfo[0]) > d && strval(baninfo[1]) == m && strval(baninfo[2]) == y)
+		curtimestamp = date_to_timestamp(y,m,d,h,mint,s);
+		if(curtimestamp < strval(baninfo[0]))
 		{
+		    timestamp_to_date(strval(baninfo[0]),y,m,d,h,mint,s);
 		    format(string,sizeof(string),"Аккаунт {F81414}%s{ffffff} временно {F81414}заблокирован{ffffff}.", GetName(i));
 			SendClientMessage(i,COL_RED,string);
-			//SFM(i,COLOR_WHITE,"Аккаунт {F81414}%s{ffffff} временно {F81414}заблокирован{ffffff}.", GetName(i));
-			format(string,sizeof(string),"Причина бана: {F81414}%s{ffffff}. Забанил: {F81414}%s{ffffff}.",baninfo[4], baninfo[3]);
+			format(string,sizeof(string),"Причина бана: {F81414}%s{ffffff}. Забанил: {F81414}%s{ffffff}.",baninfo[2], baninfo[1]);
 			SendClientMessage(i,COLOR_WHITE,string);
-			format(string,sizeof(string),"Дата разблокировки: {F81414}%02d.%02d.%02dг.{ffffff} Время: {F81414}%02d:%02d{ffffff}.",strval(baninfo[0]),strval(baninfo[1]),strval(baninfo[2]),strval(baninfo[5]),strval(baninfo[6]));
+			format(string,sizeof(string),"Дата разблокировки: {F81414}%02d %s %04dг.{ffffff} Время: {F81414}%02d:%02d{ffffff}.",d,GetMonthNameRus(m),y,h,mint);
             SendClientMessage(i,COLOR_WHITE,string);
 			Kick(i);
 			return 1;
@@ -4932,7 +5096,6 @@ public LoginCallback(i, password[])
 	}
 	SetPVarInt(i, "Logged", 1);
 	SendClientMessage(i,COLOR_WHITE, "Вы успешно {00ff00}авторизовались!  {ffffff}Добро пожаловать на {ffff99}Гонку Вооружений!");
-//	GetPlayerName(playerid, sendername, sizeof(sendername));
 	new ip[MAX_PLAYER_NAME];
 	GetPlayerIp(i, ip, sizeof(ip));
 	format(string, sizeof(string), "{b51414}>>> {808080}%s (ID: %d) подключился к серверу | IP: {b51414}%s.",GetName(i),i,ip);
@@ -4952,57 +5115,20 @@ public LoginCallback(i, password[])
 	{
 	    format(string,sizeof(string),"Внимание {ffffff}> {ffff99}%s {ffffff}авторизовался как {ffff99}%s",GetName(i),GetAdminRank(PlayerInfo[i][pAdmin]));
 	    SendClientMessageToAll(COL_GREEN,string);
-	    log("ALogged",string);
 	}
 	PlayerTeam[i] = 1;
 	TogglePlayerSpectating(i, 0), ForceClassSelection(i);
 	return true;
 }
-/*stock GetGunName(gunid)
-{
-	new gunname[64];
-	switch(gunid)
-	{
-	case 0: gunname = "Кулаки";
-	case 4: gunname = "Нож";
-	case 16: gunname = "Grenade";
-	case 22: gunname = "Dual Pistols";
-	case 23: gunname = "Silenced Pistol";
-	case 24: gunname = "Desert Eagle";
-	case 25: gunname = "Shotgun";
-	case 26: gunname = "Sawnoff Shotgun";
-	case 27: gunname = "Combat Shotgun";
-	case 28: gunname = "Micro SMG";
-	case 29: gunname = "MP5";
-	case 30: gunname = "AK-47";
-	case 31: gunname = "M4A1";
-	case 32: gunname = "Tec-9";
-	case 33: gunname = "Country Rifle";
-	case 34: gunname = "Sniper Rifle";
-	case 51: gunname = "Гранаты";
-	case 2: gunname = "Winner";
-	case 1: gunname = "Кастет";
-	default: gunname = "Неисп. оружие";
-	}
-	return gunname;
-}
- */
 stock UpdateInformer(playerid)
 {
 	new updater[600];
-	if(PlayerTeam[playerid] == 1) format(updater,sizeof(updater), "{FF0000}%s - Террорист\n\n{FFFFFF}Уровень: {FFFF99}%d {FFFFFF}({FFFF99}%d{FFFFFF}/{FFFF99}2{FFFFFF})\nОружие: {FFFF99}%s\n{FFFFFF}Звание: {FFFF99}%s {ffffff}({ffff99}%d {ffffff}ARR)",GetName(playerid),GunLevel[playerid]+1,KillScore[playerid],GetGunName(LevelWeapons[GunLevel[playerid]][0]),RankNames[PlayerInfo[playerid][pRank]],PlayerInfo[playerid][pRating]);
-	else if(PlayerTeam[playerid] == 2) format(updater,sizeof(updater), "{0000FF}%s - Спецназовец\n\n{FFFFFF}Уровень: {FFFF99}%d {FFFFFF}({FFFF99}%d{FFFFFF}/{FFFF99}2{FFFFFF})\nОружие: {FFFF99}%s\n{FFFFFF}Звание: {FFFF99}%s {ffffff}({ffff99}%d {ffffff}ARR)",GetName(playerid),GunLevel[playerid]+1,KillScore[playerid],GetGunName(LevelWeapons[GunLevel[playerid]][0]),RankNames[PlayerInfo[playerid][pRank]], PlayerInfo[playerid][pRating]);
+	if(PlayerTeam[playerid] == 1) format(updater,sizeof(updater), "{FF0000}%s - Террорист\n\n{FFFFFF}Уровень: {FFFF99}%d {FFFFFF}({FFFF99}%d{FFFFFF}/{FFFF99}2{FFFFFF})\nОружие: {FFFF99}%s\n{FFFFFF}Звание: {FFFF99}%s {ffffff}({ffff99}%d {ffffff}ARR)",GetName(playerid),GunLevel[playerid]+1,KillScore[playerid],GetGunName(LevelWeapons[GunLevel[playerid]]),RankNames[PlayerInfo[playerid][pRank]],PlayerInfo[playerid][pRating]);
+	else if(PlayerTeam[playerid] == 2) format(updater,sizeof(updater), "{0000FF}%s - Спецназовец\n\n{FFFFFF}Уровень: {FFFF99}%d {FFFFFF}({FFFF99}%d{FFFFFF}/{FFFF99}2{FFFFFF})\nОружие: {FFFF99}%s\n{FFFFFF}Звание: {FFFF99}%s {ffffff}({ffff99}%d {ffffff}ARR)",GetName(playerid),GunLevel[playerid]+1,KillScore[playerid],GetGunName(LevelWeapons[GunLevel[playerid]]),RankNames[PlayerInfo[playerid][pRank]], PlayerInfo[playerid][pRating]);
 	Update3DTextLabelText(PlayerInformer[playerid],COLOR_WHITE,updater);
 	return 1;
 }
-/*CMD:info(playerid,params[])
-{
-	if(GetPVarInt(playerid,"Logged") == 1)
-	{
-		ShowPlayerDialog(playerid, 1337, DIALOG_STYLE_MSGBOX,"О моде","Гонка Вооружений\n\n\nВерсия: 4.5 | Release 46 - Final\nДата выхода: 10.04.2015\nГруппа VK: vk.com/armrace_samp\nСайт: armrace.besaba.com\n\n\nАвторы:\n\n+ Скриптер: MaDoy\n+ Создатель UCP: _Flomka_\n+ Тестеры: steadY., Mystery.\n\nЕсли Вам понравился проект,\nВы можете пожертвовать любую сумму на этот WM-кошелек:\nR252789446533\n\n(c) 2013-2015, MADMIL Inc.","Закрыть","");
-	}
-	return 1;
-}*/
+
 CMD:help(playerid,params[])
 {
 	if(GetPVarInt(playerid,"Logged") == 1)
@@ -5011,15 +5137,7 @@ CMD:help(playerid,params[])
 	}
 	return 1;
 }
-/*CMD:cmd(playerid,params[])
-{
-	if(GetPVarInt(playerid,"Logged") == 1)
-	{
-		ShowPlayerDialog(playerid, 1337, DIALOG_STYLE_MSGBOX,"Список команд","Гонка Вооружений\n\n\n/help - помощь по игре\n/cmd - список команд\n/info - информация о создателях\n/pm - написать ЛС\n/changeteam - сменить команду\n/healme - пополнить здоровье\n/kolokol - звуки при попадании в игроков\n/vipinfo - информация о VIP\n/leaders - лидеры сервера\n/team - чат команды\n/id - узнать ID по нику\n/menu - меню игрока\n/time - дата и время\n/team - состав команды\n/players - список игроков","Закрыть","");
-	}
-	return 1;
-}
-*/
+
 CMD:healme(playerid,params[])
 {
 	if(GetPVarInt(playerid,"Logged") == 1)
@@ -5378,54 +5496,7 @@ CMD:vip(playerid,params[])
 	return 1;
 }
 ALT:vip:v;
-/*CMD:togooc(playerid, params[])
-{
-	if(PlayerInfo[playerid][pAdmin] < 7) return true;
-	if(!GetPVarInt(playerid, "Logged")) return true;
-	if(gChat == 0)
-	{
-		SendClientMessageToAll(COLOR_WHITE,"Внимание! Общий чат {ff0000}отключен {ffffff}администрацией сервера");
-		gChat = 1;
-	}
-	else
-	{
-		SendClientMessageToAll(COLOR_WHITE, "Внимание! Общий чат {00ff00}включен {ffffff}администрацией сервера");
-		gChat = 0;
-	}
-	return 1;
-}
-CMD:togvip(playerid, params[])
-{
-	if(PlayerInfo[playerid][pAdmin] < 7) return true;
-	if(!GetPVarInt(playerid, "Logged")) return true;
-	if(gVip == 0)
-	{
-		SendClientMessageToAll(COLOR_WHITE,"Внимание! Чат VIP пользователей {ff0000}отключен {ffffff}администрацией сервера");
-		gVip = 1;
-	}
-	else
-	{
-		SendClientMessageToAll(COLOR_WHITE, "Внимание! Чат VIP пользователей {00ff00}включен {ffffff}администрацией сервера");
-		gVip = 0;
-	}
-	return 1;
-}
-CMD:togteam(playerid, params[])
-{
-	if(PlayerInfo[playerid][pAdmin] < 7) return true;
-	if(!GetPVarInt(playerid, "Logged")) return true;
-	if(gTeam == 0)
-	{
-		SendClientMessageToAll(COLOR_WHITE,"Внимание! Чаты команд {ff0000}отключены {ffffff}администрацией сервера");
-		gTeam = 1;
-	}
-	else
-	{
-		SendClientMessageToAll(COLOR_WHITE, "Внимание! Чаты команд {00ff00}включены {ffffff}администрацией сервера");
-		gTeam = 0;
-	}
-	return 1;
-}*/
+
 public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY, Float:fZ)
 {
 	AllShots++;
@@ -5520,8 +5591,8 @@ stock ShowStats(playerid)
 	RankNames[PlayerInfo[playerid][pRank]],PlayerInfo[playerid][pRating],PlayerInfo[playerid][pKills],PlayerInfo[playerid][pDeaths],float(PlayerInfo[playerid][pKills]) / float(PlayerInfo[playerid][pDeaths]),PlayerInfo[playerid][pShots],PlayerInfo[playerid][pGoodShots],
 	GetAllPlayerShotQuallity(playerid),PlayerInfo[playerid][pDamageGiven],
 	PlayerInfo[playerid][pDamageTaken],PlayerInfo[playerid][pBestSeries]);
-	format(allstring,sizeof(allstring),"%s\nИгр сыграно: %d\nИгр выиграно: %d\nИгр покинуто: %d\nСредний уровень в играх: %d\n\nНомер аккаунта: %d\nРегистрация: %d.%02d.%d в %d:%02d\nИгровая активность: %d минут\n\nПредупреждений: %d/3\nУровень администированния: %s\nVIP аккаунт: %d секунд",allstring,PlayerInfo[playerid][pGames], PlayerInfo[playerid][pWins],PlayerInfo[playerid][pLeaves],GetPlayerMiddleLevel(playerid),PlayerInfo[playerid][pID],day,month,year,hour,minute,
-	PlayerInfo[playerid][pCTime],PlayerInfo[playerid][pWarn],GetAdminRank(PlayerInfo[playerid][pAdmin]),PlayerInfo[playerid][pVip]);
+	format(allstring,sizeof(allstring),"%s\nИгр сыграно: %d\nИгр выиграно: %d\nИгр покинуто: %d\nСредний уровень в играх: %d\n\nНомер аккаунта: %d\nРегистрация: %d.%02d.%d в %d:%02d\nИгровая активность: %d минут\n\nПредупреждений: %d/3\nУровень администированния: %s",allstring,PlayerInfo[playerid][pGames], PlayerInfo[playerid][pWins],PlayerInfo[playerid][pLeaves],GetPlayerMiddleLevel(playerid),PlayerInfo[playerid][pID],day,month,year,hour,minute,
+	PlayerInfo[playerid][pCTime],PlayerInfo[playerid][pWarn],GetAdminRank(PlayerInfo[playerid][pAdmin]));
 	if(PlayerInfo[playerid][pVip] == 0) strcat(allstring,"\nVIP аккаунт: Нет");
 	else
 	{
@@ -5806,32 +5877,6 @@ CMD:specoff(playerid,params[])
 	TogglePlayerSpectating(playerid,0);
 	return 1;
 }
-/*forward SetTeamColor();
-public SetTeamColor()
-{
-    foreach(Player,i)
-    {
-        foreach(Player,id)
-	    {
-	        if(PlayerTeam[i] == PlayerTeam[id])
-	        {
-		        switch(PlayerTeam[i])
-		        {
-			        case 1: SetPlayerMarkerForPlayer(i,id,COL_RED);
-			        case 2: SetPlayerMarkerForPlayer(i,id,COLOR_BLUE);
-		        }
-			}
-			else
-			{
-   				switch(PlayerTeam[i])
-		        {
-			        case 1: SetPlayerMarkerForPlayer(i,id,COL_RED);
-			        case 2: SetPlayerMarkerForPlayer(i,id,COLOR_BLUE);
-		        }
-			}
-	    }
-    }
-}*/
 forward SetTeamColor(playerid);
 public SetTeamColor(playerid)
 {
@@ -5887,7 +5932,7 @@ public UpdateTime()
 	new hour,minute;
 	gettime(hour, minute);
 	new timestr[32];
-	format(timestr,32,"~w~%02d~y~:~w~%02d",hour,minute);
+	format(timestr,32,"%02d:%02d",hour,minute);
 	TextDrawSetString(TimeDisp,timestr);
 	SetWorldTime(hour);
 	foreach(Player,i)
@@ -6064,7 +6109,7 @@ GetPlayersMiddleLevel()
 }
 
 
-mysql_player_exist(name[])
+/*mysql_player_exist(name[])
 {
 new logstr[128], rows, fields;
 format(logstr, sizeof(logstr),"SELECT `Name` FROM `accounts` WHERE `Name` = '%s'", name);
@@ -6072,7 +6117,7 @@ format(logstr, sizeof(logstr),"SELECT `Name` FROM `accounts` WHERE `Name` = '%s'
 	cache_get_data(rows, fields);
 	if(rows) return true;
 	else return false;
-}
+}*/
 
 UpdateScore()
 {
@@ -6131,7 +6176,7 @@ UpdateExpTD(playerid)
 UpdateLevelTD(playerid)
 {
 	new string[64];
-	format(string,sizeof(string),"Level: %d/%d (%s)",GunLevel[playerid]+1,ServerSettings[ssLevels]+1,GetGunName(LevelWeapons[GunLevel[playerid]][0]));
+	format(string,sizeof(string),"Level: %d/%d (%s)",GunLevel[playerid]+1,ServerSettings[ssLevels]+1,GetGunName(LevelWeapons[GunLevel[playerid]]));
 	TextDrawSetString(level[playerid],string);
 }
 
@@ -6180,7 +6225,7 @@ ShowLevelWeaponsMenu(playerid)
 	new string[400];
 	for(new i = 0;i<ServerSettings[ssLevels];i++)
     {
-    	format(string,sizeof(string),"%sУровень %d - %s\n",string,i+1,GetGunName(LevelWeapons[i][0]));
+    	format(string,sizeof(string),"%sУровень %d - %s\n",string,i+1,GetGunName(LevelWeapons[i]));
     }
     ShowPlayerDialog(playerid,16,DIALOG_STYLE_LIST,"Оружия по уровням - Панель конфигурации сервера",string,"Изменить","Назад");
 	return 1;
@@ -6193,7 +6238,7 @@ ShowLevelWeaponsMenu(playerid)
 } */
 
 
-/*stock GetADateAsString(timestamp, lenght, string[]) // Записывает в строку дату, конвертированную из unix, относительно текущего времени (по аналогии с ВК) | Нуждается в тесте, еще не протестированно
+/*stock GetADateAsString(timestamp, lenght, string[]) // Записывает в строку дату, конвертированную из unix, относительно текущего времени | Нуждается в тесте, еще не протестированно
 {
 	new cyear,cmonth,cday,chour,cminute,csecond, delta;
 	new year,month,day,hour,minute,second;
@@ -6257,14 +6302,14 @@ public CheckForUpdates()
 	{
 		printf("");
 		printf("ВНИМАНИЕ!");
-		printf("Со дня выпуска текущей сборки Гонки Вооружений прошло более месяца!");
+		printf("Со дня выпуска текущей версии Гонки Вооружений прошло более месяца!");
 		printf("Мы рекомендуем скачать самую последнюю сборку по адресу:");
-		printf("> github.com/ <");
+		printf("> https://github.com/MaDoyScripts <");
 		printf("Подсказка: Для отключения уведомления измените макрос ANNOUNCE_IF_OLD на 0");
 		printf("");
 	}
 	return true;
 }
-// Гонка Вооружений - v1.0 (Сборка 1)
+// Гонка Вооружений - v1.0
 // (c) 2014-2016, MADMIL Inc.
-// 6418 строк
+// 6653 строки
